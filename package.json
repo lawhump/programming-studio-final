@@ -39,6 +39,7 @@
     }
   },
   "dependencies": {
+    "bower": "^1.6.5",
     "express": "^4.13.3",
     "request": "^2.65.0",
     "ws": "^0.8.0"
