@@ -37,11 +37,19 @@ var app = app || {};
 
 	    	$('#myModal').modal('hide');
 
-	    	var userJSON = JSON.stringify({"user": username, "location": location});
-	    	console.log(userJSON);
+	    	var latlng;
+	    	app.Map.locationToLatLng("801 S Lincoln Ave, Urbana, IL 61801, United States")
+	    	.then(function(res) {
+	    		latlng = res;
+	    		var userJSON = JSON.stringify({"user": username, "location": latlng});
+	    		app.ws.send(userJSON);
+
+	    	}, function(err) {
+	    		console.log('fucked uppppp');
+	    	});
 
 	    	// TODO only add if unique
-	    	app.ws.send(userJSON);
+	    	// app.ws.send(userJSON);
 	    	// app.Users.add({location: location, username: username});
 	    	// app.Feed.updateWithNewUser(username);
 	    }

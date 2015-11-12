@@ -15,6 +15,7 @@ var app = app || {};
 	    	this.infowindow = null;
 	        this.place = null;
 	        this.marker = null;
+	        this.map = null;
 	        this.image = 'images/user.png';
 	    	this.initMap();
 		},
@@ -22,7 +23,7 @@ var app = app || {};
 		// All of this logic is near copy/pasted from a Google Maps API example.
 		// Tweaked slightly.
 		initMap: function() {
-			var map = new google.maps.Map(document.getElementById('map'), {
+			this.map = new google.maps.Map(document.getElementById('map'), {
 				center: {lat: 40.1058647, lng: -88.2193354},
 				streetViewControl: false,
 				zoom: 13
@@ -32,15 +33,15 @@ var app = app || {};
 
 			var types = document.getElementById('type-selector');
 			// map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
-			map.controls[google.maps.ControlPosition.TOP_LEFT].push(types);
+			this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(types);
 
 			var autocomplete = new google.maps.places.Autocomplete(input);
-			autocomplete.bindTo('bounds', map);
+			autocomplete.bindTo('bounds', this.map);
 
 			this.infowindow = new google.maps.InfoWindow();
 			this.marker = new google.maps.Marker({
 				icon: this.image,
-				map: map,
+				map: this.map,
 				anchorPoint: new google.maps.Point(0, -29)
 			});
 
@@ -48,6 +49,7 @@ var app = app || {};
 				app.Map.infowindow.close();
 				app.Map.marker.setVisible(false);
 				app.Map.place = autocomplete.getPlace();
+				console.log(app.Map.place);
 				if (!app.Map.place.geometry) {
 					window.alert("Autocomplete's returned place contains no geometry");
 					return;
@@ -55,10 +57,10 @@ var app = app || {};
 
 				// If the place has a geometry, then present it on a map.
 				if (app.Map.place.geometry.viewport) {
-					map.fitBounds(app.Map.place.geometry.viewport);
+					app.Map.map.fitBounds(app.Map.place.geometry.viewport);
 				} else {
-					map.setCenter(app.Map.place.geometry.location);
-					map.setZoom(17);  // Why 17? Because it looks good.
+					app.Map.map.setCenter(app.Map.place.geometry.location);
+					app.Map.map.setZoom(17);  // Why 17? Because it looks good.
 				}
 			});	
 		},
@@ -110,8 +112,7 @@ var app = app || {};
 			var parsedSong = JSON.parse(user.song);
 
 			var albumArt = parsedSong.recenttracks.track[0].image[1]['#text'];
-
-			console.log(albumArt);
+			var songTitle = parsedSong.recenttracks.track[0].name;
 
 			this.marker.setIcon(/** @type {google.maps.Icon} */({
 				url: albumArt,
@@ -124,7 +125,7 @@ var app = app || {};
 			// console.log(this.place.geometry.location);
 			// var loc = this.place.geometry.location;
 
-			this.marker.setPosition(user.location);
+			this.marker.setPosition(new google.maps.LatLng(user.location));
 			// this.marker.setPosition(new google.maps.LatLng({lat: loc.lat()+Math.random()/100000, lng: loc.lng()+Math.random()/100000}));
 			// this.marker.setPosition(this.place.geometry.location);
 			this.marker.setVisible(true);
@@ -138,8 +139,29 @@ var app = app || {};
 				].join(' ');
 			}
 
-			// this.infowindow.setContent('<div><strong>' + place.name + '</strong><br>' + address);
-			this.infowindow.open(map, this.marker);
+			this.infowindow.setContent('<div><strong>' + user.user + '</strong><br>' + songTitle);
+			this.infowindow.open(this.map, this.marker);
+		},
+
+		locationToLatLng: function(location) {
+			console.log(location);
+			var deferred = $.Deferred(),
+			 geocoder = new google.maps.Geocoder();
+
+			geocoder.geocode({"address": location}, function(results, status) {
+				if (status == google.maps.GeocoderStatus.OK) {
+					console.log(results);
+					//In this case it creates a marker, but you can get the lat and lng from the location.LatLng
+					var latlng = {"lat": results[0].geometry.location.lat(), "lng": results[0].geometry.location.lng()};
+					deferred.resolve(latlng);
+				} 
+
+				else {
+					alert("Geocode was not successful for the following reason: " + status);
+					deferred.reject(status);
+				}
+			});
+			return deferred.promise();
 		}
 	});
 

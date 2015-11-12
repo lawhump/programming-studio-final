@@ -20,7 +20,6 @@ var app = app || {};
 	    },
 
 	    update: function(user) {
-	    	console.log(user);
 	    	var parsed = JSON.parse(user.data);
 	    	var parsedSong = JSON.parse(parsed.song);
 
