@@ -97,6 +97,13 @@ wss.broadcast = function broadcast(data) {
 wss.on("connection", function(ws) {
 	console.log("websocket connection open");
 	wss.showCurrentConnections(ws);
+	setInterval(function() {
+		for (var index=0; index<usersAPI.users.length; index++) {
+			var user = usersAPI.users[index];
+			console.log(user);
+			usersAPI.updateUser(user);
+		}
+	}, 60000);
 
 	ws.on("close", function() {
 		console.log("websocket connection close");
@@ -117,14 +124,14 @@ wss.on("connection", function(ws) {
 	});
 });
 
-(function(){
-	console.log('yo');
-	// For ever connected user, update self
-	for (var index=0; index<usersAPI.users.length; index++) {
-		var user = usersAPI.users[index];
-		console.log(user);
-		usersAPI.updateUser(user);
-	}
+// (function(){
+// 	console.log('yo');
+// 	// For ever connected user, update self
+// 	for (var index=0; index<usersAPI.users.length; index++) {
+// 		var user = usersAPI.users[index];
+// 		console.log(user);
+// 		usersAPI.updateUser(user);
+// 	}
 
-    setTimeout(arguments.callee, 60000); // every minute and a half or 90 seconds
-})();
+//     setTimeout(arguments.callee, 60000); // every minute and a half or 90 seconds
+// })();
