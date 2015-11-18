@@ -75,7 +75,10 @@ var app = app || {};
 		 * Again, most of this is copy/pasted and tweaked slightly.
 		 */
 		updateMap: function(user) {
+			console.log('in updateMap');
 			console.log(user);
+			console.log(this.infowindows);
+			console.log(this.markers);
 
 			var index = -1;
 			// if user is already on the map
@@ -125,10 +128,20 @@ var app = app || {};
 			var albumArt = parsedSong.recenttracks.track[0].image[1]['#text'];
 			var songTitle = parsedSong.recenttracks.track[0].name;
 
-			var marker = new google.maps.Marker({
-	            position: this.place.geometry.location,
-	            map: this.map
-	        });
+			var marker;
+			if (this.place != null) {
+				marker = new google.maps.Marker({
+		            position: this.place.geometry.location || user.location,
+		            map: this.map
+		        });
+			}
+
+			else {
+				marker = new google.maps.Marker({
+		            position: user.location,
+		            map: this.map
+		        });
+			}
 	        
 			marker.setIcon(/** @type {google.maps.Icon} */({
 				url: albumArt,
@@ -157,16 +170,6 @@ var app = app || {};
 			// this.marker.setPosition(new google.maps.LatLng({lat: loc.lat()+Math.random()/100000, lng: loc.lng()+Math.random()/100000}));
 			// this.marker.setPosition(this.place.geometry.location);
 			marker.setVisible(true);
-
-			var address = '';
-			if (this.place.address_components) {
-				address = [
-					(this.place.address_components[0] && this.place.address_components[0].short_name || ''),
-					(this.place.address_components[1] && this.place.address_components[1].short_name || ''),
-					(this.place.address_components[2] && this.place.address_components[2].short_name || '')
-				].join(' ');
-			}
-
 			
 			infowindow.setContent('<div><strong>' + user.user + '</strong><br>' + songTitle);
 			infowindow.open(this.map, marker);
@@ -196,16 +199,6 @@ var app = app || {};
 			// this.marker.setPosition(new google.maps.LatLng({lat: loc.lat()+Math.random()/100000, lng: loc.lng()+Math.random()/100000}));
 			// this.marker.setPosition(this.place.geometry.location);
 			marker.setVisible(true);
-
-			var address = '';
-			if (this.place.address_components) {
-				address = [
-					(this.place.address_components[0] && this.place.address_components[0].short_name || ''),
-					(this.place.address_components[1] && this.place.address_components[1].short_name || ''),
-					(this.place.address_components[2] && this.place.address_components[2].short_name || '')
-				].join(' ');
-			}
-
 			
 			infowindow.setContent('<div><strong>' + user.user + '</strong><br>' + songTitle);
 			infowindow.open(this.map, marker);
