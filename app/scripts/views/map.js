@@ -13,8 +13,10 @@ var app = app || {};
 
 	    initialize: function() {
 	    	this.infowindow = null;
+	    	this.infowindows = [];
 	        this.place = null;
 	        this.marker = null;
+	        this.markers = [];
 	        this.map = null;
 	        this.image = 'images/user.png';
 	    	this.initMap();
@@ -49,7 +51,6 @@ var app = app || {};
 				app.Map.infowindow.close();
 				app.Map.marker.setVisible(false);
 				app.Map.place = autocomplete.getPlace();
-				console.log(app.Map.place);
 				if (!app.Map.place.geometry) {
 					window.alert("Autocomplete's returned place contains no geometry");
 					return;
@@ -58,7 +59,9 @@ var app = app || {};
 				// If the place has a geometry, then present it on a map.
 				if (app.Map.place.geometry.viewport) {
 					app.Map.map.fitBounds(app.Map.place.geometry.viewport);
-				} else {
+				} 
+
+				else {
 					app.Map.map.setCenter(app.Map.place.geometry.location);
 					app.Map.map.setZoom(17);  // Why 17? Because it looks good.
 				}
@@ -71,78 +74,30 @@ var app = app || {};
 		 * the proximity.
 		 * Again, most of this is copy/pasted and tweaked slightly.
 		 */
-		// updateMap: function(response) {
-		// 	console.log(response);
-
-		// 	var albumArt = response.recenttracks.track[0].image[1]['#text'];
-
-		// 	console.log(albumArt);
-
-		// 	this.marker.setIcon(/** @type {google.maps.Icon} */({
-		// 		url: albumArt,
-		// 		size: new google.maps.Size(71, 71),
-		// 		origin: new google.maps.Point(0, 0),
-		// 		anchor: new google.maps.Point(17, 34),
-		// 		scaledSize: new google.maps.Size(50, 50)
-		// 	}));
-
-		// 	console.log(this.place.geometry.location);
-
-		// 	var loc = this.place.geometry.location;
-
-		// 	this.marker.setPosition(new google.maps.LatLng({lat: loc.lat()+Math.random()/100000, lng: loc.lng()+Math.random()/100000}));
-		// 	// this.marker.setPosition(this.place.geometry.location);
-		// 	this.marker.setVisible(true);
-
-		// 	var address = '';
-		// 	if (this.place.address_components) {
-		// 		address = [
-		// 			(this.place.address_components[0] && this.place.address_components[0].short_name || ''),
-		// 			(this.place.address_components[1] && this.place.address_components[1].short_name || ''),
-		// 			(this.place.address_components[2] && this.place.address_components[2].short_name || '')
-		// 		].join(' ');
-		// 	}
-
-		// 	// this.infowindow.setContent('<div><strong>' + place.name + '</strong><br>' + address);
-		// 	this.infowindow.open(map, this.marker);
-		// }
-
 		updateMap: function(user) {
 			console.log(user);
-			var parsedSong = JSON.parse(user.song);
 
-			var albumArt = parsedSong.recenttracks.track[0].image[1]['#text'];
-			var songTitle = parsedSong.recenttracks.track[0].name;
-
-			this.marker.setIcon(/** @type {google.maps.Icon} */({
-				url: albumArt,
-				size: new google.maps.Size(71, 71),
-				origin: new google.maps.Point(0, 0),
-				anchor: new google.maps.Point(17, 34),
-				scaledSize: new google.maps.Size(50, 50)
-			}));
-
-			// console.log(this.place.geometry.location);
-			// var loc = this.place.geometry.location;
-
-			this.marker.setPosition(new google.maps.LatLng(user.location));
-			// this.marker.setPosition(new google.maps.LatLng({lat: loc.lat()+Math.random()/100000, lng: loc.lng()+Math.random()/100000}));
-			// this.marker.setPosition(this.place.geometry.location);
-			this.marker.setVisible(true);
-
-			var address = '';
-			if (this.place.address_components) {
-				address = [
-					(this.place.address_components[0] && this.place.address_components[0].short_name || ''),
-					(this.place.address_components[1] && this.place.address_components[1].short_name || ''),
-					(this.place.address_components[2] && this.place.address_components[2].short_name || '')
-				].join(' ');
+			var index = -1;
+			// if user is already on the map
+			for (var i = this.infowindows.length - 1; i >= 0; i--) {
+				if(this.infowindows[i].content.includes(user.user)) {
+					index = i;
+				}
 			}
 
-			this.infowindow.setContent('<div><strong>' + user.user + '</strong><br>' + songTitle);
-			this.infowindow.open(this.map, this.marker);
+			// if user not on map
+			if (index < 0) {
+				this.addUser(user);
+			}
+
+			else {
+				this.updateUser(user, index);
+			}
 		},
 
+		/**
+		 * Convert the string representation of the address to latitude and longitude
+		 */
 		locationToLatLng: function(location) {
 			console.log(location);
 			var deferred = $.Deferred(),
@@ -162,6 +117,98 @@ var app = app || {};
 				}
 			});
 			return deferred.promise();
+		},
+
+		addUser: function(user) {
+			var parsedSong = JSON.parse(user.song);
+
+			var albumArt = parsedSong.recenttracks.track[0].image[1]['#text'];
+			var songTitle = parsedSong.recenttracks.track[0].name;
+
+			var marker = new google.maps.Marker({
+	            position: this.place.geometry.location,
+	            map: this.map
+	        });
+	        
+			marker.setIcon(/** @type {google.maps.Icon} */({
+				url: albumArt,
+				size: new google.maps.Size(71, 71),
+				origin: new google.maps.Point(0, 0),
+				anchor: new google.maps.Point(17, 34),
+				scaledSize: new google.maps.Size(50, 50)
+			}));
+
+			this.markers.push(marker);
+
+			var i;
+			var infowindow = new google.maps.InfoWindow();
+	        // Allow each marker to have an info window    
+	        // google.maps.event.addListener(marker, 'click', (function(marker, i) {
+	        //     return function() {
+	        //         infoWindow.setContent(this.infowindows[i][0]);
+	        //         infoWindow.open(map, marker);
+	        //     }
+	        // })(marker, i));
+
+			// console.log(this.place.geometry.location);
+			// var loc = this.place.geometry.location;
+
+			marker.setPosition(new google.maps.LatLng(user.location));
+			// this.marker.setPosition(new google.maps.LatLng({lat: loc.lat()+Math.random()/100000, lng: loc.lng()+Math.random()/100000}));
+			// this.marker.setPosition(this.place.geometry.location);
+			marker.setVisible(true);
+
+			var address = '';
+			if (this.place.address_components) {
+				address = [
+					(this.place.address_components[0] && this.place.address_components[0].short_name || ''),
+					(this.place.address_components[1] && this.place.address_components[1].short_name || ''),
+					(this.place.address_components[2] && this.place.address_components[2].short_name || '')
+				].join(' ');
+			}
+
+			
+			infowindow.setContent('<div><strong>' + user.user + '</strong><br>' + songTitle);
+			infowindow.open(this.map, marker);
+			this.infowindows.push(infowindow);
+		},
+
+		updateUser: function(user, index) {
+			var parsedSong = JSON.parse(user.song);
+
+			var albumArt = parsedSong.recenttracks.track[0].image[1]['#text'];
+			var songTitle = parsedSong.recenttracks.track[0].name;
+
+			var marker = this.markers[index];
+	        
+			marker.setIcon(/** @type {google.maps.Icon} */({
+				url: albumArt,
+				size: new google.maps.Size(71, 71),
+				origin: new google.maps.Point(0, 0),
+				anchor: new google.maps.Point(17, 34),
+				scaledSize: new google.maps.Size(50, 50)
+			}));
+
+			var i;
+			var infowindow = this.infowindows[index];
+
+			marker.setPosition(new google.maps.LatLng(user.location));
+			// this.marker.setPosition(new google.maps.LatLng({lat: loc.lat()+Math.random()/100000, lng: loc.lng()+Math.random()/100000}));
+			// this.marker.setPosition(this.place.geometry.location);
+			marker.setVisible(true);
+
+			var address = '';
+			if (this.place.address_components) {
+				address = [
+					(this.place.address_components[0] && this.place.address_components[0].short_name || ''),
+					(this.place.address_components[1] && this.place.address_components[1].short_name || ''),
+					(this.place.address_components[2] && this.place.address_components[2].short_name || '')
+				].join(' ');
+			}
+
+			
+			infowindow.setContent('<div><strong>' + user.user + '</strong><br>' + songTitle);
+			infowindow.open(this.map, marker);
 		}
 	});
 

@@ -1,7 +1,7 @@
 var app = app || {};
 
 /**
- * The map view. 
+ * The feed view. 
  */
 (function() {
 	'use strict';
@@ -19,6 +19,10 @@ var app = app || {};
 	    	return this;
 	    },
 
+	    /**
+	     * A new user has been added. Put user informaion in the feed 
+	     * and tell map to update.
+	     */
 	    update: function(user) {
 	    	var parsed = JSON.parse(user.data);
 	    	var parsedSong = JSON.parse(parsed.song);
@@ -28,7 +32,14 @@ var app = app || {};
 	        var context = {user: parsed.user, song: parsedSong.recenttracks.track[0].name, artist: parsedSong.recenttracks.track[0].artist['#text']};
 	        var html = template(context);
 
-	        app.Feed.$el.append(html);
+	        var $feedItem = $('#'+parsed.user);
+	        if ($feedItem.length != 0) {
+	        	$feedItem.replaceWith(html);
+	        }
+
+	        else {
+		        app.Feed.$el.append(html);
+		    }
 	        app.Map.updateMap(parsed);
 	    }
 

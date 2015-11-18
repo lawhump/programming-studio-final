@@ -19,31 +19,6 @@ var app = (function() {
         init: function() {
         	this.LoginView = new app.views.Login();
             return this;
-        },
-
-        /**
-         * Makes call to Last.fm API
-         * Returns jQuery deffered object signifying the Last.fm response
-         */
-        getCurrentlyPlaying: function(user) {
-        	var baseURL = 'http://ws.audioscrobbler.com/2.0/?';
-        	var apiKey 	= 'api_key=3d386c221b36c1442b384aa1d853bc8c';
-        	var format 	= 'format=json';
-        	var method 	= 'method=user.getRecentTracks';
-        	var limit 	= 'limit=1';
-
-        	var url = baseURL;
-        	url += apiKey + '&';
-        	url += format + '&';
-        	url += method + '&';
-        	url += limit + '&';
-        	url += 'user=' + user;
-
-			return $.ajax({
-				url: url,
-				method: 'GET',
-				dataType: 'JSON'
-			});
         }
     };
     
@@ -52,7 +27,7 @@ var app = (function() {
 })();
 
 /**
- * When page has loaded, fire up backbone.
+ * When page has loaded, fire up backbone and the websocket
  */
 $(document).ready(function() {
 	app.init();

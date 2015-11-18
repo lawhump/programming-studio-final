@@ -4,7 +4,14 @@ var express = require("express");
 var request = require("request");
 var app = express();
 var port = process.env.PORT || 5000;
+// Last.fm API constants
+var baseURL = 'http://ws.audioscrobbler.com/2.0/?';
+var apiKey 	= 'api_key=3d386c221b36c1442b384aa1d853bc8c';
+var format 	= 'format=json';
+var method 	= 'method=user.getRecentTracks';
+var limit 	= 'limit=1';
 
+// Serve static files from
 app.use(express.static(__dirname + "/app"));
 app.use(express.static(__dirname + "/app/styles"));
 app.use('/bower_components',  express.static(__dirname + '/bower_components'));
@@ -12,25 +19,45 @@ app.use(express.static(__dirname + "/app/scripts"));
 app.use(express.static(__dirname + "/app/fonts"));
 app.use(express.static(__dirname + "/app/images"));
 
+// Create server and tell which port to listen to
 var server = http.createServer(app);
 server.listen(port);
 
 console.log("http server listening on %d", port);
 
-var wss = new WebSocketServer({server: server});
+// Plugin for handling multiple socket connections
+var wss = new WebSocketServer({server: server, perMessageDeflate: false});
 console.log("websocket server created");
 
-
+// Information of all users who are connected
 var usersAPI = {
 	users: [],
 
 	listUsers: function() {
 		return this.users;
 	},
+	addNewUser: function(user, location) {
+		var query = buildQuery(user);
+		request.get(query, {}, function(err, res, body) {
+			var userInfo = {'user': user, 'location': location, 'song': body};
+			usersAPI.users.push(userInfo);
+			console.log('Added user.')
+			console.log(usersAPI.users);
+			wss.broadcast(JSON.stringify(userInfo));
+		});
+	},
 	addUser: function(info) {
 		this.users.push(info);
 		console.log('Added user.')
 		console.log(info);
+	},
+	updateUser: function(user) {
+		var query = buildQuery(user.user);
+		request.get(query, {}, function(err, res, body) {
+			user.song = body;
+			console.log('Updated user.')
+			wss.broadcast(JSON.stringify(user));
+		});
 	},
 	reset: function() {
 		this.users.length = 0;
@@ -39,20 +66,34 @@ var usersAPI = {
 
 console.log(usersAPI);
 
+function buildQuery(user) {
+	var url = baseURL;
+	url += apiKey + '&';
+	url += format + '&';
+	url += method + '&';
+	url += limit + '&';
+	url += 'user=' + user;
+
+	return url;
+}
+
+// For those just connecting, show every connection prior
 wss.showCurrentConnections = function showCurrentConnections(ws) {
 	var connections = usersAPI.users;
 	console.log(connections);
 	for (var index=0; index<connections.length; index++) {
-		ws.send(connections[index] );
+		ws.send(connections[index]);
 	}
 }
 
+// Transmit data to every client
 wss.broadcast = function broadcast(data) {
   wss.clients.forEach(function each(client) {
     client.send(data);
   });
 };
 
+// The 'upon connection' logic
 wss.on("connection", function(ws) {
 	console.log("websocket connection open");
 	wss.showCurrentConnections(ws);
@@ -61,6 +102,8 @@ wss.on("connection", function(ws) {
 		console.log("websocket connection close");
 	});
 
+	// When the server gets a message from a client
+	// Makes the call to Last.fm
   	ws.on('message', function incoming(message, flags) {
 	    console.log('received: %s', message);
 	    // message is JSON
@@ -70,25 +113,18 @@ wss.on("connection", function(ws) {
 	    var user = parsed.user;
 	    var location = parsed.location;
 
-	    var baseURL = 'http://ws.audioscrobbler.com/2.0/?';
-		var apiKey 	= 'api_key=3d386c221b36c1442b384aa1d853bc8c';
-		var format 	= 'format=json';
-		var method 	= 'method=user.getRecentTracks';
-		var limit 	= 'limit=1';
-
-		var url = baseURL;
-		url += apiKey + '&';
-		url += format + '&';
-		url += method + '&';
-		url += limit + '&';
-		url += 'user=' + user;
-
-		request.get(url, {}, function(err, res, body) {
-			// console.log(body);
-
-			var userInfo = {'user': user, 'location': location, 'song': body};
-			usersAPI.addUser(userInfo);
-			wss.broadcast(JSON.stringify(userInfo));
-		});
+		usersAPI.addNewUser(user, location);
 	});
 });
+
+(function(){
+	console.log('yo');
+	// For ever connected user, update self
+	for (var index=0; index<usersAPI.users.length; index++) {
+		var user = usersAPI.users[index];
+		console.log(user);
+		usersAPI.updateUser(user);
+	}
+
+    setTimeout(arguments.callee, 60000); // every minute and a half or 90 seconds
+})();
