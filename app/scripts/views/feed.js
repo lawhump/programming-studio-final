@@ -33,6 +33,8 @@ var app = app || {};
 	        var context = {user: parsed.user, song: parsedSong.recenttracks.track[0].name, artist: parsedSong.recenttracks.track[0].artist['#text']};
 	        var html = template(context);
 
+	        // Search the DOM for elements with id=parsed.user
+	        // If non-empty, this person exists, so just update it
 	        var $feedItem = $('#'+parsed.user);
 	        if ($feedItem.length != 0) {
 	        	$feedItem.replaceWith(html);

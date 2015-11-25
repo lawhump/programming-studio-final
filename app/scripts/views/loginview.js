@@ -9,12 +9,16 @@ var app = app || {};
 	app.views.Login = Backbone.View.extend({
 	    events: {
 	        'click #submit': 'addUser',
+	        'keypress #username': 'keypressHandler'
 	    },
 
 	    el: '#myModal',
 
 	    initialize: function() {
+	    	// Deprecated?
 	    	this.song = null;
+	    	this.locCheckbox = document.getElementById('remember-location');
+	    	this.usrCheckbox = document.getElementById('remember-user');
 	        this.render();
 	    },
 
@@ -39,13 +43,26 @@ var app = app || {};
 	    		app.ws.send(userJSON);
 
 	    	}, function(err) {
-	    		console.log('fucked uppppp');
+	    		console.log('cussed uppppp');
 	    	});
 
-	    	// TODO only add if unique
-	    	/*app.ws.send(userJSON);
-	    	app.Users.add({location: location, username: username});
-	    	app.Feed.updateWithNewUser(username);*/
+	    	if (this.usrCheckbox.checked) {
+	    		// Enforce only one entry in localStorage
+	    		localStorage.clear();
+	    		if (this.locCheckbox.checked) {
+	    			localStorage[app.localStorePrefix+username.toLowerCase()] = true;
+	    		}
+	    		else {
+		    		localStorage[app.localStorePrefix+username.toLowerCase()] = false;
+		    	}
+	    	}
+	    },
+
+	    keypressHandler: function(e) {
+	    	var code = (e.keyCode ? e.keyCode : e.which);
+			if(code == 13) { //Enter keycode
+				this.addUser();
+			}
 	    }
 	});
 })();

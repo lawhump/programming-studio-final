@@ -12,6 +12,7 @@ var app = app || {};
 
 
 	    initialize: function() {
+	    	this.moved = false;
 	    	this.infowindow = null;
 	    	this.infowindows = [];
 	        this.place = null;
@@ -57,13 +58,16 @@ var app = app || {};
 				}
 
 				// If the place has a geometry, then present it on a map.
-				if (app.Map.place.geometry.viewport) {
-					app.Map.map.fitBounds(app.Map.place.geometry.viewport);
-				} 
+				if (!app.Map.moved) {
+					if (app.Map.place.geometry.viewport) {
+						app.Map.map.fitBounds(app.Map.place.geometry.viewport);
+					} 
 
-				else {
-					app.Map.map.setCenter(app.Map.place.geometry.location);
-					app.Map.map.setZoom(17);  // Why 17? Because it looks good.
+					else {
+						app.Map.map.setCenter(app.Map.place.geometry.location);
+						app.Map.map.setZoom(17);  // Why 17? Because it looks good.
+					}
+					app.Map.moved = true;
 				}
 			});	
 		},
@@ -75,11 +79,6 @@ var app = app || {};
 		 * Again, most of this is copy/pasted and tweaked slightly.
 		 */
 		updateMap: function(user) {
-			console.log('in updateMap');
-			console.log(user);
-			console.log(this.infowindows);
-			console.log(this.markers);
-
 			var index = -1;
 			// if user is already on the map
 			for (var i = this.infowindows.length - 1; i >= 0; i--) {
@@ -108,7 +107,6 @@ var app = app || {};
 
 			geocoder.geocode({"address": location}, function(results, status) {
 				if (status == google.maps.GeocoderStatus.OK) {
-					console.log(results);
 					//In this case it creates a marker, but you can get the lat and lng from the location.LatLng
 					var latlng = {"lat": results[0].geometry.location.lat(), "lng": results[0].geometry.location.lng()};
 					deferred.resolve(latlng);
@@ -122,6 +120,7 @@ var app = app || {};
 			return deferred.promise();
 		},
 
+		// This is a new user. Add a new marker for them on the map
 		addUser: function(user) {
 			var parsedSong = JSON.parse(user.song);
 
@@ -129,9 +128,11 @@ var app = app || {};
 			var songTitle = parsedSong.recenttracks.track[0].name;
 
 			var marker;
+			// Basically is this a new connection.
+			// Ran into issues with this.place being null for people jumping in later.
 			if (this.place != null) {
 				marker = new google.maps.Marker({
-		            position: this.place.geometry.location || user.location,
+		            position: this.place.geometry.location,
 		            map: this.map
 		        });
 			}
@@ -156,19 +157,17 @@ var app = app || {};
 			var i;
 			var infowindow = new google.maps.InfoWindow();
 	        // Allow each marker to have an info window    
-	        // google.maps.event.addListener(marker, 'click', (function(marker, i) {
-	        //     return function() {
-	        //         infoWindow.setContent(this.infowindows[i][0]);
-	        //         infoWindow.open(map, marker);
-	        //     }
-	        // })(marker, i));
-
-			// console.log(this.place.geometry.location);
-			// var loc = this.place.geometry.location;
+	        /*google.maps.event.addListener(marker, 'click', (function(marker, i) {
+	            return function() {
+	                infoWindow.setContent(this.infowindows[i][0]);
+	                infoWindow.open(map, marker);
+	            }
+	        })(marker, i));*/
+			
+			/*console.log(this.place.geometry.location);
+			var loc = this.place.geometry.location;*/
 
 			marker.setPosition(new google.maps.LatLng(user.location));
-			// this.marker.setPosition(new google.maps.LatLng({lat: loc.lat()+Math.random()/100000, lng: loc.lng()+Math.random()/100000}));
-			// this.marker.setPosition(this.place.geometry.location);
 			marker.setVisible(true);
 			
 			infowindow.setContent('<div><strong>' + user.user + '</strong><br>' + songTitle);
@@ -176,6 +175,7 @@ var app = app || {};
 			this.infowindows.push(infowindow);
 		},
 
+		// User is already on the map. Just update their marker and infowindow
 		updateUser: function(user, index) {
 			var parsedSong = JSON.parse(user.song);
 
@@ -196,8 +196,6 @@ var app = app || {};
 			var infowindow = this.infowindows[index];
 
 			marker.setPosition(new google.maps.LatLng(user.location));
-			// this.marker.setPosition(new google.maps.LatLng({lat: loc.lat()+Math.random()/100000, lng: loc.lng()+Math.random()/100000}));
-			// this.marker.setPosition(this.place.geometry.location);
 			marker.setVisible(true);
 			
 			infowindow.setContent('<div><strong>' + user.user + '</strong><br>' + songTitle);

@@ -4,6 +4,21 @@ $icon-font-path: '../fonts/';
 @import "bower_components/bootstrap-sass/assets/stylesheets/_bootstrap.scss";
 // endbower
 
+@keyframes bounce {
+  0% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(2px);
+  }
+  75% {
+    transform: translateY(-2px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
 .browserupgrade {
   margin: 0.2em 0;
   background: #ccc;
@@ -46,6 +61,7 @@ $icon-font-path: '../fonts/';
 .fab {
   border-radius: 50%;
   bottom: 5vmin;
+  box-shadow: 0 3px 15px rgba(0,0,0,.5);
   height: 100px;
   left: 5vmin;
   position: absolute;
@@ -53,5 +69,11 @@ $icon-font-path: '../fonts/';
 
   &:focus {
     outline: none;
+  }
+
+  &:hover {
+    > i {
+      animation: bounce .7s infinite ease-in-out; 
+    }
   }
 }

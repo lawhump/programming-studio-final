@@ -4,12 +4,13 @@
     <meta charset="utf-8">
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title></title>
+    <title>Whispering Journey</title>
 
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <!-- Place favicon.ico in the root directory -->
 
     <!-- build:css styles/vendor.css -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
     <!-- bower:css -->
     <!-- endbower -->
     <!-- endbuild -->
@@ -46,7 +47,7 @@
       </div>
     </div>
 
-    <button type="button" class="fab btn btn-primary btn-lg">+</button>
+    <button type="button" class="fab btn btn-primary btn-lg"><i class="fa fa-user-plus"></i></button>
 
     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
       <div class="modal-dialog" role="document">
@@ -65,11 +66,21 @@
 
             <label for="pac-input">Location</label>
             <input id="pac-input" class="controls" type="text"
-        placeholder="Enter a location">
+        placeholder="Enter a location" autofocus>
 
         <label for="username">Username</label>
             <input id="username" class="controls" type="text"
         placeholder="e.g. Guapo15">
+
+            <br>
+            
+            <label class="checkbox-inline">
+              <input type="checkbox" id="remember-user" value="rem-user"> Remember Me
+            </label>
+            <label class="checkbox-inline">
+              <input type="checkbox" id="remember-location" value="rem-loc"> Use future locations
+            </label>
+            
 
           </div>
           <div class="modal-footer">

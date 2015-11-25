@@ -10,6 +10,7 @@ var app = (function() {
 	 * Vs, or Cs in themselves. Rookie mistake, I know.
 	 */
     var api = {
+        localStorePrefix: 'whisperingJourney-',
         views: {},
         models: {},
         collections: {},
@@ -17,8 +18,47 @@ var app = (function() {
 		LoginView: null,
 
         init: function() {
-        	this.LoginView = new app.views.Login();
+            if (localStorage.length != 0) {
+                // Theoretically this will work most of the time.
+                // User is most likely to put themselves in first.
+                // Assumption: localStorage preserves order.
+                var useLoc = localStorage.getItem(localStorage.key(0));
+                // console.log(useLoc);
+                if (useLoc === true || useLoc == 'true') {
+                    this.showCurrentLocation();
+                }
+            }
+            this.LoginView = new app.views.Login();
             return this;
+        },
+
+        showCurrentLocation: function() {
+            console.log('here');
+            // Try HTML5 geolocation.
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                var pos = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+
+                app.Map.map.setCenter(pos);
+                app.Map.map.setZoom(17);
+            }, function() {
+                handleLocationError(true, app.Map.map.getCenter());
+                });
+            } 
+
+            else {
+                // Browser doesn't support Geolocation
+                handleLocationError(false, app.Map.map.getCenter());
+            }
+        },
+
+        handleLocationError: function(browserHasLocation, pos) {
+            console.log(browserHasGeolocation ?
+                        'Error: The Geolocation service failed.' :
+                        'Error: Your browser doesn\'t support geolocation.');
         }
     };
     
@@ -47,6 +87,5 @@ $(document).ready(function() {
  * modal used for inputting place and username.
  */
 $('.fab').on('click', function() {
-    // Send data to server
 	app.LoginView.render();
 });

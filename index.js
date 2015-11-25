@@ -31,11 +31,11 @@ console.log("websocket server created");
 
 // Information of all users who are connected
 var usersAPI = {
+	// Sample element looks like this
+	// {'user': Guapo15, 'location': {'lat': 40, 'lng': 80}, 'song': {{last.fm response}}}
 	users: [],
 
-	listUsers: function() {
-		return this.users;
-	},
+	// Add new user to users and broadcast
 	addNewUser: function(user, location) {
 		var query = buildQuery(user);
 		request.get(query, {}, function(err, res, body) {
@@ -46,11 +46,13 @@ var usersAPI = {
 			wss.broadcast(JSON.stringify(userInfo));
 		});
 	},
+	// Deprecated
 	addUser: function(info) {
 		this.users.push(info);
 		console.log('Added user.')
 		console.log(info);
 	},
+	// Get user's current song and broadcast
 	updateUser: function(user) {
 		var query = buildQuery(user.user);
 		request.get(query, {}, function(err, res, body) {
@@ -59,6 +61,7 @@ var usersAPI = {
 			wss.broadcast(JSON.stringify(user));
 		});
 	},
+	// Used earlier for testing, but still useful so it's hanging around
 	reset: function() {
 		this.users.length = 0;
 	}
@@ -66,6 +69,7 @@ var usersAPI = {
 
 console.log(usersAPI);
 
+// Return the Last.fm query for this given user
 function buildQuery(user) {
 	var url = baseURL;
 	url += apiKey + '&';
@@ -96,7 +100,9 @@ wss.broadcast = function broadcast(data) {
 // The 'upon connection' logic
 wss.on("connection", function(ws) {
 	console.log("websocket connection open");
+	// Show existing connections upon connection
 	wss.showCurrentConnections(ws);
+	// Every 60 seconds, get users' current song
 	setInterval(function() {
 		for (var index=0; index<usersAPI.users.length; index++) {
 			var user = usersAPI.users[index];
@@ -124,14 +130,14 @@ wss.on("connection", function(ws) {
 	});
 });
 
-// (function(){
-// 	console.log('yo');
-// 	// For ever connected user, update self
-// 	for (var index=0; index<usersAPI.users.length; index++) {
-// 		var user = usersAPI.users[index];
-// 		console.log(user);
-// 		usersAPI.updateUser(user);
-// 	}
+/*(function(){
+	console.log('yo');
+	// For ever connected user, update self
+	for (var index=0; index<usersAPI.users.length; index++) {
+		var user = usersAPI.users[index];
+		console.log(user);
+		usersAPI.updateUser(user);
+	}
 
-//     setTimeout(arguments.callee, 60000); // every minute and a half or 90 seconds
-// })();
+    setTimeout(arguments.callee, 60000); // every minute and a half or 90 seconds
+})();*/
