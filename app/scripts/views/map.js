@@ -29,14 +29,13 @@ var app = app || {};
 			this.map = new google.maps.Map(document.getElementById('map'), {
 				center: {lat: 40.1058647, lng: -88.2193354},
 				streetViewControl: false,
+				disableDefaultUI: true,
 				zoom: 13
 			});
 			var input = /** @type {!HTMLInputElement} */(
 				document.getElementById('pac-input'));
 
 			var types = document.getElementById('type-selector');
-			// map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
-			this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(types);
 
 			var autocomplete = new google.maps.places.Autocomplete(input);
 			autocomplete.bindTo('bounds', this.map);
@@ -79,6 +78,7 @@ var app = app || {};
 		 * Again, most of this is copy/pasted and tweaked slightly.
 		 */
 		updateMap: function(user) {
+			console.log(this.infowindows);
 			var index = -1;
 			// if user is already on the map
 			for (var i = this.infowindows.length - 1; i >= 0; i--) {
@@ -122,6 +122,7 @@ var app = app || {};
 
 		// This is a new user. Add a new marker for them on the map
 		addUser: function(user) {
+			console.log(this.infowindows);
 			var parsedSong = JSON.parse(user.song);
 
 			var albumArt = parsedSong.recenttracks.track[0].image[1]['#text'];
@@ -131,6 +132,10 @@ var app = app || {};
 			// Basically is this a new connection.
 			// Ran into issues with this.place being null for people jumping in later.
 			if (this.place != null) {
+				// var infowindow = _.find(this.infowindows, function(iw) {
+				// 	return iw.getPosition() == this.place.geometry.location;
+				// });
+
 				marker = new google.maps.Marker({
 		            position: this.place.geometry.location,
 		            map: this.map
@@ -145,7 +150,6 @@ var app = app || {};
 			}
 	        
 			marker.setIcon(/** @type {google.maps.Icon} */({
-				url: albumArt,
 				size: new google.maps.Size(71, 71),
 				origin: new google.maps.Point(0, 0),
 				anchor: new google.maps.Point(17, 34),
@@ -155,23 +159,15 @@ var app = app || {};
 			this.markers.push(marker);
 
 			var i;
-			var infowindow = new google.maps.InfoWindow();
-	        // Allow each marker to have an info window    
-	        /*google.maps.event.addListener(marker, 'click', (function(marker, i) {
-	            return function() {
-	                infoWindow.setContent(this.infowindows[i][0]);
-	                infoWindow.open(map, marker);
-	            }
-	        })(marker, i));*/
-			
-			/*console.log(this.place.geometry.location);
-			var loc = this.place.geometry.location;*/
+			var infowindow = new google.maps.InfoWindow({maxWidth: 300});
 
 			marker.setPosition(new google.maps.LatLng(user.location));
 			marker.setVisible(true);
 			
 			infowindow.setContent('<div><strong>' + user.user + '</strong><br>' + songTitle);
-			infowindow.open(this.map, marker);
+			marker.addListener('click', function() {
+				infowindow.open(this.map, marker);
+			});
 			this.infowindows.push(infowindow);
 		},
 
@@ -185,7 +181,6 @@ var app = app || {};
 			var marker = this.markers[index];
 	        
 			marker.setIcon(/** @type {google.maps.Icon} */({
-				url: albumArt,
 				size: new google.maps.Size(71, 71),
 				origin: new google.maps.Point(0, 0),
 				anchor: new google.maps.Point(17, 34),
@@ -199,7 +194,6 @@ var app = app || {};
 			marker.setVisible(true);
 			
 			infowindow.setContent('<div><strong>' + user.user + '</strong><br>' + songTitle);
-			infowindow.open(this.map, marker);
 		}
 	});
 

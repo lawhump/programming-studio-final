@@ -37,14 +37,20 @@ var usersAPI = {
 
 	// Add new user to users and broadcast
 	addNewUser: function(user, location) {
-		var query = buildQuery(user);
-		request.get(query, {}, function(err, res, body) {
-			var userInfo = {'user': user, 'location': location, 'song': body};
-			usersAPI.users.push(userInfo);
-			console.log('Added user.')
-			console.log(usersAPI.users);
-			wss.broadcast(JSON.stringify(userInfo));
-		});
+		var exists = this.checkExistenceOf(user);
+		if (exists == -1) {
+			var query = buildQuery(user);
+			request.get(query, {}, function(err, res, body) {
+				var userInfo = {'user': user, 'location': location, 'song': body};
+				usersAPI.users.push(userInfo);
+				console.log('Added user.')
+				console.log(usersAPI.users);
+				wss.broadcast(JSON.stringify(userInfo));
+			});
+		}
+		else {
+			this.updateUserLocation(user, location, exists);
+		}
 	},
 	// Deprecated
 	addUser: function(info) {
@@ -60,6 +66,19 @@ var usersAPI = {
 			console.log('Updated user.')
 			wss.broadcast(JSON.stringify(user));
 		});
+	},
+	updateUserLocation: function(user, location, index) {
+		console.log('yo');
+		this.users[index].location = location;
+		wss.broadcast(JSON.stringify(user));
+	},
+	// Potential race condition.
+	// I'm just being lazy and don't want to do two O(n) calls
+	checkExistenceOf: function(user) {
+		for (var i = this.users.length - 1; i >= 0; i--) {
+			if (this.users[i].user == user) { return i; }
+		}
+		return -1;
 	},
 	// Used earlier for testing, but still useful so it's hanging around
 	reset: function() {

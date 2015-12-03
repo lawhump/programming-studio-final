@@ -40,6 +40,10 @@ var app = app || {};
 	    	.then(function(res) {
 	    		latlng = res;
 	    		var userJSON = JSON.stringify({"user": username, "location": latlng});
+	    		if (app.Me.username == undefined) {
+		    		app.Me.username = username;
+		    		app.Me.createWithUser(username);
+		    	}
 	    		app.ws.send(userJSON);
 
 	    	}, function(err) {

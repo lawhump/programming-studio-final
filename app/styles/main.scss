@@ -4,6 +4,10 @@ $icon-font-path: '../fonts/';
 @import "bower_components/bootstrap-sass/assets/stylesheets/_bootstrap.scss";
 // endbower
 
+@mixin unit-in-dp($attr, $val) {
+  #{$attr}: ($val / 160);
+}
+
 @keyframes bounce {
   0% {
     transform: translateY(0);
@@ -27,7 +31,7 @@ $icon-font-path: '../fonts/';
 }
 
 .page-content {
-  background: url("../images/small_steps.png") repeat;
+  // background: url("../images/small_steps.png") repeat;
   height: 100vh;
   padding: 0;
 }
@@ -76,4 +80,61 @@ $icon-font-path: '../fonts/';
       animation: bounce .7s infinite ease-in-out; 
     }
   }
+}
+
+.local-user {
+  background-color: #ffffff;
+  border-radius: 2px;
+  bottom: 5vmin;
+  box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24);
+  display: inline-block;
+  font-size: 16px;
+  left: 5vmin;
+  margin: 8px;
+  @include unit-in-dp(padding, 16in); 
+  position: absolute;
+  width: 380px;
+  
+  img {
+    height: 100px;
+    width: 100px
+  }
+}
+
+.button-wrapper {
+  display: inline-block;
+  background-color: rgba(0,0,0,0);
+  /* Remove grey background on link clicked in ios safari */
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  text-transform: uppercase;
+  transition: background-color .3s ease-in-out;
+  
+  &:hover {
+    background-color: rgba(99,99,99,0.2);
+  }
+}
+
+/*
+The attributes below style the
+flat button based on the Google
+material design language.
+*/
+
+.buttonFlat {
+  /* Form */
+  display: inline-block;
+  height: 36px;
+  background-color: rgba(9,9,9,0);
+  /* Typography */
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: rgba(33,150,243,0.9);
+  line-height: 36px;
+  text-align: center;
+  letter-spacing: 0.4px;     
+  /* Internal padding */
+  padding: 0 8px;
+  /* External padding – Touch target size */
+  margin: 6px 4px;
 }

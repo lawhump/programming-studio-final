@@ -6,9 +6,7 @@ var app = app || {};
 (function() {
 	'use strict';
 	app.views.Feed = Backbone.View.extend({
-	    events: {
-	        
-	    },
+	    events: { },
 
 	    initialize: function() {
 	    	this.res = null;
@@ -30,7 +28,12 @@ var app = app || {};
 
 	    	var source = $('#feed-template').html();
 	        var template = Handlebars.compile(source);
-	        var context = {user: parsed.user, song: parsedSong.recenttracks.track[0].name, artist: parsedSong.recenttracks.track[0].artist['#text']};
+	        var context = {
+	        	user: parsed.user, 
+	        	song: parsedSong.recenttracks.track[0].name, 
+	        	artist: parsedSong.recenttracks.track[0].artist['#text'],
+	        	cover: parsedSong.recenttracks.track[0].image[1]['#text'] || "http://placehold.it/75x75"
+	        };
 	        var html = template(context);
 
 	        // Search the DOM for elements with id=parsed.user
@@ -38,6 +41,10 @@ var app = app || {};
 	        var $feedItem = $('#'+parsed.user);
 	        if ($feedItem.length != 0) {
 	        	$feedItem.replaceWith(html);
+	        }
+
+	        else if (parsed.user.toLowerCase() == app.Me.username.toLowerCase()) {
+	        	app.Me.updateMe(parsedSong);
 	        }
 
 	        else {

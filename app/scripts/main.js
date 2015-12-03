@@ -18,17 +18,23 @@ var app = (function() {
 		LoginView: null,
 
         init: function() {
+            this.Me = new app.views.Me({el: $('.local-user')});
             if (localStorage.length != 0) {
                 // Theoretically this will work most of the time.
                 // User is most likely to put themselves in first.
                 // Assumption: localStorage preserves order.
-                var useLoc = localStorage.getItem(localStorage.key(0));
-                // console.log(useLoc);
-                if (useLoc === true || useLoc == 'true') {
+                var key = localStorage.key(0);
+                var useLoc = localStorage.getItem(key);
+                if (useLoc == 'true') {
                     this.showCurrentLocation();
+                    var username = key.substring(18);
+                    console.log(username);
+                    this.Me.createWithUser(username);
                 }
             }
-            this.LoginView = new app.views.Login();
+            else {
+                this.LoginView = new app.views.Login();
+            }
             return this;
         },
 
@@ -41,6 +47,8 @@ var app = (function() {
                     lat: position.coords.latitude,
                     lng: position.coords.longitude
                 };
+
+                this.pos = pos;
 
                 app.Map.map.setCenter(pos);
                 app.Map.map.setZoom(17);
@@ -59,6 +67,13 @@ var app = (function() {
             console.log(browserHasGeolocation ?
                         'Error: The Geolocation service failed.' :
                         'Error: Your browser doesn\'t support geolocation.');
+        },
+
+        syncClientAndServer: function() {
+            if (app.Me.username != undefined) {
+                var userJSON = JSON.stringify({"user": app.Me.username, "location": app.pos});
+                app.ws.send(userJSON);
+            }
         }
     };
     
@@ -74,18 +89,15 @@ $(document).ready(function() {
     var host = location.origin.replace(/^http/, 'ws')
     var ws = new WebSocket(host);
     app.ws = ws;
+    // app.syncClientAndServer();
+
     ws.onmessage = function (event) {
         app.Feed.update(event);
     };
 });
 
-/**
- * I know this seems out of place, but that's because I didn't want to define a new 
- * backbone component with such little logic.
- * 
- * Event listener for the FAB - floating action button. When clicked, just display the
- * modal used for inputting place and username.
- */
-$('.fab').on('click', function() {
-	app.LoginView.render();
+$('#myModal').on('hidden.bs.modal', function (e) {
+    if($('#me').length == 0){
+        app.Me.createDefault();
+    }
 });
