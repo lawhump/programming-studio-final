@@ -9,6 +9,7 @@ var app = app || {};
 	app.views.Login = Backbone.View.extend({
 	    events: {
 	        'click #submit': 'addUser',
+	        'click #remember-user': 'checkboxClicked',
 	        'keypress #username': 'keypressHandler'
 	    },
 
@@ -59,6 +60,17 @@ var app = app || {};
 	    		else {
 		    		localStorage[app.localStorePrefix+username.toLowerCase()] = false;
 		    	}
+	    	}
+	    },
+
+	    checkboxClicked: function() {
+	    	if (document.getElementById('remember-user').checked) {
+	    		$('#remember-location').removeClass('hidden');
+	    		$('#remember-location').parent().removeClass('hidden');
+	    	}
+	    	else {
+	    		$('#remember-location').addClass('hidden');	
+	    		$('#remember-location').parent().addClass('hidden');	
 	    	}
 	    },
 
