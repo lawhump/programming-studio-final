@@ -94,7 +94,7 @@ var app = app || {};
 	    	var context = {
 	        	header: app.Me.username, 
 	        	subheader: parsed.recenttracks.track[0].name + ' - ' +  parsed.recenttracks.track[0].artist['#text'],
-	        	image: parsed.recenttracks.track[0].image[1]['#text'] || "http://placehold.it/100x100",
+	        	image: parsed.recenttracks.track[0].image[2]['#text'] || "http://placehold.it/100x100",
 	        	cta: 'Sign out'
 	        };
 	        var html = app.Me.template(context);
