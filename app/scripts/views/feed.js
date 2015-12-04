@@ -23,34 +23,39 @@ var app = app || {};
 	     */
 	    update: function(user) {
 	    	console.log(user);
-	    	var parsed = JSON.parse(user.data);
-	    	var parsedSong = JSON.parse(parsed.song);
+	    	if (user.data.length > 0) {
+		    	var parsed = JSON.parse(user.data);
+		    	var parsedSong = JSON.parse(parsed.song);
 
-	    	var source = $('#feed-template').html();
-	        var template = Handlebars.compile(source);
-	        var context = {
-	        	user: parsed.user, 
-	        	song: parsedSong.recenttracks.track[0].name, 
-	        	artist: parsedSong.recenttracks.track[0].artist['#text'],
-	        	cover: parsedSong.recenttracks.track[0].image[1]['#text'] || "http://placehold.it/75x75"
-	        };
-	        var html = template(context);
+		    	var source = $('#feed-template').html();
+		        var template = Handlebars.compile(source);
+		        var context = {
+		        	user: parsed.user, 
+		        	song: parsedSong.recenttracks.track[0].name, 
+		        	artist: parsedSong.recenttracks.track[0].artist['#text'],
+		        	cover: parsedSong.recenttracks.track[0].image[1]['#text'] || "http://placehold.it/75x75"
+		        };
+		        var html = template(context);
 
-	        // Search the DOM for elements with id=parsed.user
-	        // If non-empty, this person exists, so just update it
-	        var $feedItem = $('#'+parsed.user);
-	        if ($feedItem.length != 0) {
-	        	$feedItem.replaceWith(html);
-	        }
+		        // Search the DOM for elements with id=parsed.user
+		        // If non-empty, this person exists, so just update it
+		        var $feedItem = $('#'+parsed.user);
 
-	        else if (parsed.user.toLowerCase() == app.Me.username.toLowerCase()) {
-	        	app.Me.updateMe(parsedSong);
-	        }
+		        if (app.Me.username != undefined) {
+			        if ($feedItem.length != 0) {
+			        	$feedItem.replaceWith(html);
+			        }
 
-	        else {
-		        app.Feed.$el.append(html);
+			        else if (parsed.user.toLowerCase() == app.Me.username.toLowerCase()) {
+			        	app.Me.updateMe(parsedSong);
+			        }
+
+			        else {
+				        app.Feed.$el.append(html);
+				    }
+			        app.Map.updateMap(parsed);
+			    }
 		    }
-	        app.Map.updateMap(parsed);
 	    }
 
 	    /*updateWithNewUser: function(user) {
