@@ -31,7 +31,7 @@ var app = app || {};
 	    	this.username = username;
 	    	$('.local-user').removeClass('hidden');
 	    	// Last.fm API constants
-			var baseURL = 'http://ws.audioscrobbler.com/2.0/?';
+			var baseURL = 'https://ws.audioscrobbler.com/2.0/?';
 			var apiKey 	= 'api_key=3d386c221b36c1442b384aa1d853bc8c';
 			var format 	= 'format=json';
 			var method 	= 'method=user.getRecentTracks';
