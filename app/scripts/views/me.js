@@ -27,6 +27,7 @@ var app = app || {};
 		 * Client-side call to Last.fm to make it seem like it's always making progress.
 	     */
 	    createWithUser: function(username) {
+	    	this.$el.empty();
 	    	console.log('Creating me with user ' + username);
 	    	this.username = username;
 	    	$('.local-user').removeClass('hidden');
@@ -72,6 +73,7 @@ var app = app || {};
 	     * possible.
 	     */
 	    createDefault: function() {
+	    	this.$el.empty();
 	    	console.log('Creating me with default user/sign in prompt');
 	    	$('.local-user').removeClass('hidden');
 	        var context = {
