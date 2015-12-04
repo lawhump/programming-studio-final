@@ -19,7 +19,6 @@ var app = app || {};
 	        this.marker = null;
 	        this.markers = [];
 	        this.map = null;
-	        this.image = 'images/user.png';
 	    	this.initMap();
 		},
 
@@ -42,7 +41,6 @@ var app = app || {};
 
 			this.infowindow = new google.maps.InfoWindow();
 			this.marker = new google.maps.Marker({
-				icon: this.image,
 				map: this.map,
 				anchorPoint: new google.maps.Point(0, -29)
 			});
