@@ -28,7 +28,6 @@ var app = (function() {
                 if (useLoc == 'true') {
                     this.showCurrentLocation();
                     var username = key.substring(18);
-                    console.log(username);
                     this.Me.createWithUser(username);
                 }
             }
@@ -38,6 +37,9 @@ var app = (function() {
             return this;
         },
 
+        /**
+         * You know where we are. Show it on the map.
+         */
         showCurrentLocation: function() {
             console.log('here');
             // Try HTML5 geolocation.
@@ -69,6 +71,7 @@ var app = (function() {
                         'Error: Your browser doesn\'t support geolocation.');
         },
 
+        // Doesn't work yet what's the point of commenting code that I'm not using
         syncClientAndServer: function() {
             if (app.Me.username != undefined) {
                 var userJSON = JSON.stringify({"user": app.Me.username, "location": app.pos});

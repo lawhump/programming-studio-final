@@ -33,7 +33,7 @@ var app = app || {};
 		        	user: parsed.user, 
 		        	song: parsedSong.recenttracks.track[0].name, 
 		        	artist: parsedSong.recenttracks.track[0].artist['#text'],
-		        	cover: parsedSong.recenttracks.track[0].image[1]['#text'] || "http://placehold.it/75x75"
+		        	cover: parsedSong.recenttracks.track[0].image[1]['#text'] || "http://placehold.it/64?text=No+image"
 		        };
 		        var html = template(context);
 
