@@ -16,8 +16,7 @@ var app = app || {};
 	    el: '#myModal',
 
 	    initialize: function() {
-	    	// Deprecated?
-	    	this.song = null;
+	    	this.signedIn	 = false;
 	    	this.locCheckbox = document.getElementById('remember-location');
 	    	this.usrCheckbox = document.getElementById('remember-user');
 	        this.render();
@@ -31,6 +30,7 @@ var app = app || {};
 	     * Just make user and send to server
 	     */
 	    addUser: function() {
+	    	this.signedIn = true;
 	    	var usernameField = document.getElementById('username');
 	    	var username = usernameField.value;
 
@@ -43,7 +43,7 @@ var app = app || {};
 	    		var userJSON = JSON.stringify({"user": username, "location": latlng});
 	    		if (app.Me.username == undefined) {
 		    		app.Me.username = username;
-		    		app.Me.createWithUser(username);
+		    		app.Me.createWithUser(username, latlng);
 		    	}
 	    		app.ws.send(userJSON);
 

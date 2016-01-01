@@ -42,16 +42,26 @@ var app = app || {};
 		        var $feedItem = $('#'+parsed.user);
 
 		        if (app.Me.username != undefined) {
+		        	// This user exists already
 			        if ($feedItem.length != 0) {
 			        	$feedItem.replaceWith(html);
 			        }
-
+			        // This is Me
 			        else if (parsed.user.toLowerCase() == app.Me.username.toLowerCase()) {
 			        	app.Me.updateMe(parsedSong);
 			        }
-
+			        // New user
 			        else {
 				        app.Feed.$el.append(html);
+				        app.Users.add({
+				        	location: parsed.location,
+				        	username: parsed.user,
+				        	song: {
+				        		song: parsedSong.recenttracks.track[0].name, 
+					        	artist: parsedSong.recenttracks.track[0].artist['#text'],
+					        	cover: parsedSong.recenttracks.track[0].image[1]['#text'] || "http://placehold.it/64?text=No+image"
+				        	}
+				        });
 				    }
 			        app.Map.updateMap(parsed);
 			    }

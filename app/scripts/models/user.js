@@ -11,6 +11,7 @@ var app = app || {};
     app.models.User = Backbone.Model.extend({
     	location: null,
     	username: 'Guapo15',
+    	song: {},
 
 		init: function() {}
 

@@ -80,7 +80,6 @@ var app = (function() {
         }
     };
     
-    console.log('initializing app');
     return api; 
 })();
 
@@ -100,7 +99,7 @@ $(document).ready(function() {
 });
 
 $('#myModal').on('hidden.bs.modal', function (e) {
-    if($('#me').length == 0){
+    if(!app.LoginView.signedIn){
         app.Me.createDefault();
     }
 });

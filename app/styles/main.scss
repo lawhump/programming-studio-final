@@ -23,6 +23,11 @@ $icon-font-path: '../fonts/';
   }
 }
 
+body {
+  height: 100vh;
+  width: 100vw;
+}
+
 .browserupgrade {
   margin: 0.2em 0;
   background: #ccc;

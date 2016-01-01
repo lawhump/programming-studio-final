@@ -26,7 +26,7 @@ var app = app || {};
 	     * is currently listening to.
 		 * Client-side call to Last.fm to make it seem like it's always making progress.
 	     */
-	    createWithUser: function(username) {
+	    createWithUser: function(username, location) {
 	    	this.$el.empty();
 	    	console.log('Creating me with user ' + username);
 	    	this.username = username;
@@ -63,6 +63,16 @@ var app = app || {};
 		        var html = app.Me.template(context);
 		        app.Me.$el.append(html);
 		        $('#relocate').removeClass('hidden');
+		        console.log(parsed);
+		        app.Users.add({
+		        	location: location,
+		        	username: username,
+		        	song: {
+		        		song: parsed.recenttracks.track[0].name, 
+			        	artist: parsed.recenttracks.track[0].artist['#text'],
+			        	cover: parsed.recenttracks.track[0].image[1]['#text'] || "http://placehold.it/64?text=No+image"
+		        	}
+		        });
 		      },
 		      type: 'GET'
 		   });
@@ -79,7 +89,7 @@ var app = app || {};
 	        var context = {
 	        	header: 'Sign in and fit in', 
 	        	subheader: 'It is as simple as pressing the "SIGN IN" button.',
-	        	image: "http://placehold.it/100x100",
+	        	image: "http://placehold.it/100x100&text=No+image+available",
 	        	cta: 'Sign in'
 	        };
 	        var html = this.template(context);
@@ -90,11 +100,12 @@ var app = app || {};
 	     * Update card to reflect what I'm currently listening to (in real time)
 	     */
 	    updateMe: function(parsed) {
+	    	this.$el.empty();
 	    	console.log(parsed);
 	    	var context = {
 	        	header: app.Me.username, 
 	        	subheader: parsed.recenttracks.track[0].name + ' - ' +  parsed.recenttracks.track[0].artist['#text'],
-	        	image: parsed.recenttracks.track[0].image[2]['#text'] || "http://placehold.it/100x100",
+	        	image: parsed.recenttracks.track[0].image[2]['#text'] || 'http://www.bobjames.com/wp-content/themes/soundcheck/images/default-album-artwork.png',
 	        	cta: 'Sign out'
 	        };
 	        var html = app.Me.template(context);
